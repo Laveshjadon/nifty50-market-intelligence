@@ -1,0 +1,96 @@
+name: Fetch Market Impact News
+
+on:
+  schedule:
+    # Incremental runs during Indian market hours (UTC).
+    - cron: "30 1,5,6,8,10,12 * * 1-5"
+    # Overnight sweep at 08:45 IST / 03:15 UTC.
+    - cron: "15 3 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Fetch mode
+        required: true
+        default: incremental
+        type: choice
+        options:
+          - incremental
+          - overnight
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-market-news
+  cancel-in-progress: false
+
+jobs:
+  fetch-and-store:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install fetcher dependencies
+        run: python -m pip install numpy pandas requests python-dotenv
+
+      - name: Select fetch mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_MODE: ${{ inputs.mode }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            mode="$MANUAL_MODE"
+          elif [[ "$SCHEDULE" == "15 3 * * 1-5" ]]; then
+            mode="overnight"
+          else
+            mode="incremental"
+          fi
+
+          echo "SWEEP_MODE=$mode" >> "$GITHUB_ENV"
+
+          if [[ "$mode" == "overnight" ]]; then
+            echo "LOOKBACK_HOURS=14" >> "$GITHUB_ENV"
+          else
+            echo "LOOKBACK_HOURS=2" >> "$GITHUB_ENV"
+          fi
+
+      - name: Fetch market news
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          GNEWS_KEY: ${{ secrets.GNEWS_KEY }}
+          NEWS_REQUEST_TIMEOUT_SECONDS: "30"
+          NEWSAPI_MAX_PAGES_PER_QUERY: "2"
+        run: python fetch_incremental.py
+
+      - name: Commit updated news data
+        shell: bash
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          # news_data is intentionally ignored locally because it can grow large.
+          git add -f news_data/last_run.json
+          find news_data -maxdepth 1 -type f -name "*.csv" -print0 |
+            xargs -0 --no-run-if-empty git add -f --
+
+          if git diff --cached --quiet; then
+            echo "No news changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update market news data [skip ci]"
+          git push

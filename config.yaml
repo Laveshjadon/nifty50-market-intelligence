@@ -1,0 +1,370 @@
+# config.yaml - my main settings file. i keep everything here so i dont hardcode stuff anywhere
+version: "1.0"
+# basic index info
+index:
+  ticker: "^NSEI"
+  name: "NIFTY50_SYNTHETIC"
+  synthetic_name: "NIFTY50_SYNTHETIC"
+# db settings, actual passwords are in .env file not here
+database:
+  host: ${DB_HOST}
+  port: 5432
+  name: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  tables:
+    raw_ticks: "nifty_ticks" # raw 1min data
+    min_5: "min_5" # 5min resampled
+    index_min_5: "nifty50_index_5m" # 5min index candles
+# file paths and market timing stuff
+data:
+  csv_folder: ${DATA_FOLDER}
+  cache_path: "output/raw_5min_cache.parquet" # keeping it inside output/ so everything is in one place
+  market_hours:
+    open: "09:15"
+    close: "15:30"
+  timezone: "Asia/Kolkata"
+# all 50 nifty stocks
+tickers:
+  - ADANIENT
+  - ADANIPORTS
+  - APOLLOHOSP
+  - ASIANPAINT
+  - AXISBANK
+  - BAJAJ-AUTO
+  - BAJAJFINSV
+  - BAJFINANCE
+  - BHARTIARTL
+  - BPCL
+  - BRITANNIA
+  - CIPLA
+  - COALINDIA
+  - DIVISLAB
+  - DRREDDY
+  - EICHERMOT
+  - GRASIM
+  - HCLTECH
+  - HDFCBANK
+  - HDFCLIFE
+  - HEROMOTOCO
+  - HINDALCO
+  - HINDUNILVR
+  - ICICIBANK
+  - INDUSINDBK
+  - INFY
+  - ITC
+  - JSWSTEEL
+  - KOTAKBANK
+  - LT
+  - LTIM
+  - MARUTI
+  - MM
+  - NESTLEIND
+  - NTPC
+  - ONGC
+  - POWERGRID
+  - RELIANCE
+  - SBILIFE
+  - SBIN
+  - SUNPHARMA
+  - TATACONSUM
+  - TATAMOTORS
+  - TATASTEEL
+  - TCS
+  - TECHM
+  - TITAN
+  - ULTRACEMCO
+  - UPL
+  - WIPRO
+# some stocks have different names in data source so mapping them here
+ticker_map:
+  MM: "M&M"
+# analysis settings
+analysis:
+  crash_threshold: -0.10 # below -10% = crash day
+  monte_carlo_simulations: 1000
+  risk_free_rate_annual: 0.065 # indian tbill rate roughly
+  trading_days_per_year: 252
+# buy/sell pressure settings
+pressure:
+  rolling_window: 20 # 20 day window
+  accumulation_threshold: 0.6 # above this = buyers winning
+  distribution_threshold: 0.4 # below this = sellers winning
+# backfill settings
+backfill:
+  provider: "upstox"
+  chunk_days: 20
+  default_lookback_days: 365
+  sleep_between_chunks: 1
+  upstox:
+    instrument_file: null
+    request_timeout_seconds: 30
+    allow_symbol_fallback: false
+    instrument_map:
+      ADANIENT: "NSE_EQ|ADANIENT"
+      ADANIPORTS: "NSE_EQ|ADANIPORTS"
+      APOLLOHOSP: "NSE_EQ|APOLLOHOSP"
+      ASIANPAINT: "NSE_EQ|ASIANPAINT"
+      AXISBANK: "NSE_EQ|AXISBANK"
+      BAJAJ-AUTO: "NSE_EQ|BAJAJ-AUTO"
+      BAJAJFINSV: "NSE_EQ|BAJAJFINSV"
+      BAJFINANCE: "NSE_EQ|BAJFINANCE"
+      BHARTIARTL: "NSE_EQ|BHARTIARTL"
+      BPCL: "NSE_EQ|BPCL"
+      BRITANNIA: "NSE_EQ|BRITANNIA"
+      CIPLA: "NSE_EQ|CIPLA"
+      COALINDIA: "NSE_EQ|COALINDIA"
+      DIVISLAB: "NSE_EQ|DIVISLAB"
+      DRREDDY: "NSE_EQ|DRREDDY"
+      EICHERMOT: "NSE_EQ|EICHERMOT"
+      GRASIM: "NSE_EQ|GRASIM"
+      HCLTECH: "NSE_EQ|HCLTECH"
+      HDFCBANK: "NSE_EQ|HDFCBANK"
+      HDFCLIFE: "NSE_EQ|HDFCLIFE"
+      HEROMOTOCO: "NSE_EQ|HEROMOTOCO"
+      HINDALCO: "NSE_EQ|HINDALCO"
+      HINDUNILVR: "NSE_EQ|HINDUNILVR"
+      ICICIBANK: "NSE_EQ|ICICIBANK"
+      INDUSINDBK: "NSE_EQ|INDUSINDBK"
+      INFY: "NSE_EQ|INFY"
+      ITC: "NSE_EQ|ITC"
+      JSWSTEEL: "NSE_EQ|JSWSTEEL"
+      KOTAKBANK: "NSE_EQ|KOTAKBANK"
+      LT: "NSE_EQ|LT"
+      LTIM: "NSE_EQ|LTIM"
+      MARUTI: "NSE_EQ|MARUTI"
+      MM: "NSE_EQ|M&M"          # ticker_map already maps MM -> M&M
+      NESTLEIND: "NSE_EQ|NESTLEIND"
+      NTPC: "NSE_EQ|NTPC"
+      ONGC: "NSE_EQ|ONGC"
+      POWERGRID: "NSE_EQ|POWERGRID"
+      RELIANCE: "NSE_EQ|RELIANCE"
+      SBILIFE: "NSE_EQ|SBILIFE"
+      SBIN: "NSE_EQ|SBIN"
+      SUNPHARMA: "NSE_EQ|SUNPHARMA"
+      TATACONSUM: "NSE_EQ|TATACONSUM"
+      TATAMOTORS: "NSE_EQ|TATAMOTORS"
+      TATASTEEL: "NSE_EQ|TATASTEEL"
+      TCS: "NSE_EQ|TCS"
+      TECHM: "NSE_EQ|TECHM"
+      TITAN: "NSE_EQ|TITAN"
+      ULTRACEMCO: "NSE_EQ|ULTRACEMCO"
+      UPL: "NSE_EQ|UPL"
+      WIPRO: "NSE_EQ|WIPRO"
+# output stuff
+output:
+  directory: "output"
+  dpi: 150
+# synthetic index settings
+
+synthetic_index:
+  base_value: 1000.0
+  min_constituent_coverage_ratio: 1.0 # 1.0 means all 50 stocks must be present, lower it to like 0.9 if some stocks are missing
+  volume_method: "sum"
+  weights:
+    ADANIENT: 0.0045
+    ADANIPORTS: 0.0095
+    APOLLOHOSP: 0.0075
+    ASIANPAINT: 0.0096
+    AXISBANK: 0.0326
+    BAJAJ-AUTO: 0.0095
+    BAJAJFINSV: 0.0092
+    BAJFINANCE: 0.0210
+    BHARTIARTL: 0.0535
+    BPCL: 0.0100
+    BRITANNIA: 0.0200
+    CIPLA: 0.0067
+    COALINDIA: 0.0100
+    DIVISLAB: 0.0200
+    DRREDDY: 0.0075
+    EICHERMOT: 0.0089
+    GRASIM: 0.0095
+    HCLTECH: 0.0138
+    HDFCBANK: 0.1094
+    HDFCLIFE: 0.0062
+    HEROMOTOCO: 0.0200
+    HINDALCO: 0.0125
+    HINDUNILVR: 0.0178
+    ICICIBANK: 0.0842
+    INDUSINDBK: 0.0200
+    INFY: 0.0428
+    ITC: 0.0271
+    JSWSTEEL: 0.0103
+    KOTAKBANK: 0.0254
+    LT: 0.0402
+    LTIM: 0.0200
+    MARUTI: 0.0158
+    MM: 0.0258
+    NESTLEIND: 0.0082
+    NTPC: 0.0172
+    ONGC: 0.0108
+    POWERGRID: 0.0131
+    RELIANCE: 0.0887
+    SBILIFE: 0.0078
+    SBIN: 0.0397
+    SUNPHARMA: 0.0182
+    TATACONSUM: 0.0065
+    TATAMOTORS: 0.0061
+    TATASTEEL: 0.0155
+    TCS: 0.0235
+    TECHM: 0.0086
+    TITAN: 0.0159
+    ULTRACEMCO: 0.0124
+    UPL: 0.0200
+    WIPRO: 0.0052
+
+# modeling dataset settings
+feature_engineering:
+  volume_window: 20
+  min_rows_per_ticker: 500
+  strict_common_timestamps: true
+  clip_quantiles:
+    lower: 0.01
+    upper: 0.99
+  output_dataset_path: "output/modeling/nifty50_wide_dataset.parquet"
+  output_summary_json: "output/modeling/nifty50_wide_dataset_summary.json"
+
+# feature layout shared by the forecasting model
+model_features:
+  base_cols:
+    - log_ret
+    - log_ret_o
+    - hl_ratio
+    - co_ratio
+    - vol_ratio
+    - upper_wick_ratio
+    - lower_wick_ratio
+    - body_ratio
+    - buying_pressure
+  lags: 1
+
+# keep this block only for backward compatibility with any older scripts
+xgboost:
+  features:
+    base_cols:
+      - log_ret
+      - log_ret_o
+      - hl_ratio
+      - co_ratio
+      - vol_ratio
+      - upper_wick_ratio
+      - lower_wick_ratio
+      - body_ratio
+      - buying_pressure
+    lags: 1
+
+lstm:
+  sequence_length: 48
+  training:
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.3
+    batch_size: 32
+    epochs: 30
+    learning_rate: 0.0005
+    weight_decay: 0.0001
+    gradient_clip_norm: 1.0
+    early_stopping_patience: 5
+    lr_scheduler: true
+
+# train/eval/inference settings
+modeling:
+  dev_mode: false
+  dev_rows: 15000
+  target_column: "basket_target_ret"
+  validation_target_column: "index_target_ret"
+  train_ratio: 0.8
+  force_rebuild_dataset: false
+  output_model_path: "output/models/nifty50_lstm_state.pt"
+  output_model_metadata_path: "output/models/nifty50_lstm_metadata.json"
+  output_metrics_path: "output/models/nifty50_lstm_metrics.json"
+  output_comparison_report_path: "output/models/comparison_report.json"
+  output_latest_prediction_path: "output/models/nifty50_lstm_latest_prediction.json"
+
+# sector map + signal windows
+signals:
+  recent_bars: 1600
+  momentum_windows:
+    short: 3
+    medium: 12
+    long: 78
+  volume_spike_window: 20
+  high_low_window: 252
+  top_n: 5
+  output_path: "output/signals/latest_signals.json"
+  sector_map:
+    banking_finance:
+      - AXISBANK
+      - BAJAJFINSV
+      - BAJFINANCE
+      - HDFCBANK
+      - HDFCLIFE
+      - ICICIBANK
+      - INDUSINDBK
+      - KOTAKBANK
+      - SBILIFE
+      - SBIN
+    it_tech:
+      - HCLTECH
+      - INFY
+      - LTIM
+      - TCS
+      - TECHM
+      - WIPRO
+    pharma_health:
+      - APOLLOHOSP
+      - CIPLA
+      - DIVISLAB
+      - DRREDDY
+      - SUNPHARMA
+    auto:
+      - BAJAJ-AUTO
+      - EICHERMOT
+      - HEROMOTOCO
+      - MARUTI
+      - MM
+      - TATAMOTORS
+    energy_oil:
+      - BPCL
+      - NTPC
+      - ONGC
+      - POWERGRID
+      - RELIANCE
+    metals_mining:
+      - COALINDIA
+      - HINDALCO
+      - JSWSTEEL
+      - TATASTEEL
+    fmcg_consumer:
+      - ASIANPAINT
+      - BRITANNIA
+      - HINDUNILVR
+      - ITC
+      - NESTLEIND
+      - TATACONSUM
+      - TITAN
+      - UPL
+    cement_infra:
+      - ADANIENT
+      - ADANIPORTS
+      - GRASIM
+      - LT
+      - ULTRACEMCO
+    telecom:
+      - BHARTIARTL
+
+# news ingestion + summarization settings
+news:
+  data_dir: "news_data"
+  preferred_files:
+    - "news_gap_2025_06_12_to_2026_04_15.csv"
+    - "filtered_market_news_updated.csv"
+  lookback_days: 7
+  output_processed_csv: "output/news/latest_news_scored.csv"
+  output_summary_json: "output/news/latest_news_summary.json"
+  high_risk_negative_threshold: -0.35
+  top_negative_count: 8
+
+# final markdown report settings
+report:
+  output_path: "output/reports/nifty50_7day_report.md"

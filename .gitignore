@@ -1,0 +1,41 @@
+# Secrets
+.env
+
+# Virtual environments
+venv/
+dl_env_wsl/
+
+# Data files (too large for git)
+archive/
+*.csv
+
+# Output artifacts
+output/
+*.png
+!docs/images/*.png
+*.log
+*.pid
+pdf_report_pages/
+audit*.txt
+generate_audit.py
+PROJECT_AUDIT_REPORT.md
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+.codex
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/output/
+notebooks/title_embeddings.npy
+notebooks/decision_log.ipynb
+
+# Parquet cache
+*.parquet
+
+# news_data_csv
+news_data/
+*.csv
+.aider*
